@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Images</title>
+</head>
+<body>
+    <div id="cameraImagesContainer"></div>
+    <script>
+        window.onload = function() {
+            // Получаем ссылку на iframe с id="mainFrame"
+            var mainFrame = document.getElementById('mainFrame');
+
+            // Проверяем, существует ли iframe
+            if (mainFrame) {
+                // Получаем документ внутри iframe
+                var mainFrameDoc = mainFrame.contentDocument || mainFrame.contentWindow.document;
+
+                // Находим все iframe внутри основного iframe
+                var nestedIframes = mainFrameDoc.querySelectorAll('iframe');
+
+                // Проверяем, существует ли вложенные iframe
+                if (nestedIframes.length > 0) {
+                    // Создаем контейнер для изображений камер
+                    var imagesContainer = document.getElementById('cameraImagesContainer');
+
+                    // Проходим по каждому вложенному iframe
+                    nestedIframes.forEach(function(iframe, index) {
+                        // Получаем src вложенного iframe
+                        var nestedIframeSrc = iframe.src;
+
+                        // Проверяем, что src начинается с "http" (для обхода безопасности)
+                        if (nestedIframeSrc.startsWith('http')) {
+                            // Создаем временный iframe для загрузки встроенного плеера
+                            var tempIframe = document.createElement('iframe');
+                            tempIframe.style.display = 'none';
+                            document.body.appendChild(tempIframe);
+
+                            // Устанавливаем src для временного iframe
+                            tempIframe.src = nestedIframeSrc;
+
+                            // Ждем некоторое время для загрузки плеера
+                            setTimeout(function() {
+                                // Получаем документ внутри временного iframe
+                                var tempIframeDoc = tempIframe.contentDocument || tempIframe.contentWindow.document;
+
+                                // Находим изображение камеры внутри временного iframe
+                                var cameraImage = tempIframeDoc.querySelector('img');
+
+                                // Если изображение камеры найдено, добавляем его в контейнер
+                                if (cameraImage) {
+                                    // Создаем элемент img для отображения изображения
+                                    var imgElement = document.createElement('img');
+                                    imgElement.src = cameraImage.src;
+                                    imgElement.alt = 'Camera ' + (index + 1) + ' Image';
+                                    imagesContainer.appendChild(imgElement);
+                                }
+
+                                // Удаляем временный iframe
+                                document.body.removeChild(tempIframe);
+                            }, 2000); // Подождем 2 секунды для загрузки плеера
+                        }
+                    });
+                }
+            }
+        };
+    </script>
+</body>
+</html>
